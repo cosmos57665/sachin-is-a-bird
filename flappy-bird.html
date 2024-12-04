@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird (Image Version)</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            background: skyblue;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas dimensions
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Bird properties
+        const birdImage = new Image();
+        birdImage.src = 'bird.png'; // Ensure the file exists in the same folder
+        const bird = {
+            x: 100,
+            y: canvas.height / 2,
+            width: 40,
+            height: 40,
+            gravity: 0.07,  // Reduced gravity for easier play
+            lift: -3,     // Strong lift for easier control
+            velocity: 0
+        };
+
+        // Pipe properties
+        const pipes = [];
+        const pipeWidth = 60;
+        const pipeGap = 250; // Very wide gap
+        const pipeSpeed = 1; // Slow pipe movement
+
+        let score = 0;
+        let isGameOver = false;
+
+        function drawBird() {
+            ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
+        }
+
+        function drawPipes() {
+            pipes.forEach(pipe => {
+                // Top pipe
+                ctx.fillStyle = 'green';
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+
+                // Bottom pipe
+                ctx.fillStyle = 'green';
+                ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvas.height - pipe.top - pipeGap);
+            });
+        }
+
+        function drawScore() {
+            ctx.fillStyle = 'black';
+            ctx.font = '24px Arial';
+            ctx.fillText(`Score: ${score}`, 20, 40);
+        }
+
+        function updateBird() {
+            bird.velocity += bird.gravity;
+            bird.y += bird.velocity;
+
+            if (bird.y + bird.height >= canvas.height || bird.y <= 0) {
+                endGame();
+            }
+        }
+
+        function updatePipes() {
+            pipes.forEach(pipe => {
+                pipe.x -= pipeSpeed;
+
+                if (pipe.x + pipeWidth < 0) {
+                    pipes.shift();
+                    score++;
+                }
+
+                // Check collision
+                if (
+                    bird.x + bird.width > pipe.x &&
+                    bird.x < pipe.x + pipeWidth &&
+                    (bird.y < pipe.top || bird.y + bird.height > pipe.top + pipeGap)
+                ) {
+                    endGame();
+                }
+            });
+
+            // Add new pipe
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) {
+                const pipeTopHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
+                pipes.push({ x: canvas.width, top: pipeTopHeight });
+            }
+        }
+
+        function endGame() {
+            isGameOver = true;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'white';
+            ctx.font = '48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 50);
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!isGameOver) {
+                drawBird();
+                drawPipes();
+                drawScore();
+                updateBird();
+                updatePipes();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        window.addEventListener('keydown', () => {
+            if (!isGameOver) {
+                bird.velocity = bird.lift;
+            }
+        });
+
+        // Start the game loop after the bird image has loaded
+        birdImage.onload = () => {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
