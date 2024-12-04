@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird (Image Version)</title>
+    <title>Flappy Bird (Very Easy Mode)</title>
     <style>
         body {
             margin: 0;
@@ -27,16 +27,14 @@
         canvas.height = window.innerHeight;
 
         // Bird properties
-        const birdImage = new Image();
-        birdImage.src = 'bird.png'; // Ensure the file exists in the same folder
         const bird = {
             x: 100,
             y: canvas.height / 2,
-            width: 40,
-            height: 40,
-            gravity: 0.07,  // Reduced gravity for easier play
-            lift: -3,     // Strong lift for easier control
-            velocity: 0
+            radius: 20,
+            gravity: 0.2,  // Significantly reduced gravity
+            lift: -12,     // Strong lift for easier control
+            velocity: 0,
+            color: 'yellow'
         };
 
         // Pipe properties
@@ -49,7 +47,11 @@
         let isGameOver = false;
 
         function drawBird() {
-            ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
+            ctx.beginPath();
+            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
+            ctx.fillStyle = bird.color;
+            ctx.fill();
+            ctx.closePath();
         }
 
         function drawPipes() {
@@ -74,7 +76,7 @@
             bird.velocity += bird.gravity;
             bird.y += bird.velocity;
 
-            if (bird.y + bird.height >= canvas.height || bird.y <= 0) {
+            if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
                 endGame();
             }
         }
@@ -90,16 +92,16 @@
 
                 // Check collision
                 if (
-                    bird.x + bird.width > pipe.x &&
-                    bird.x < pipe.x + pipeWidth &&
-                    (bird.y < pipe.top || bird.y + bird.height > pipe.top + pipeGap)
+                    bird.x + bird.radius > pipe.x &&
+                    bird.x - bird.radius < pipe.x + pipeWidth &&
+                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.top + pipeGap)
                 ) {
                     endGame();
                 }
             });
 
             // Add new pipe
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) {
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) { // Wider spacing between pipes
                 const pipeTopHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
                 pipes.push({ x: canvas.width, top: pipeTopHeight });
             }
@@ -135,10 +137,7 @@
             }
         });
 
-        // Start the game loop after the bird image has loaded
-        birdImage.onload = () => {
-            gameLoop();
-        };
+        gameLoop();
     </script>
 </body>
 </html>
