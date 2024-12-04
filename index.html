@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird (Very Easy Mode)</title>
+    <title>Flappy Bird (Easy Mode)</title>
     <style>
         body {
             margin: 0;
@@ -31,8 +31,8 @@
             x: 100,
             y: canvas.height / 2,
             radius: 20,
-            gravity: 0.2,  // Significantly reduced gravity
-            lift: -12,     // Strong lift for easier control
+            gravity: 0.4, // Reduced gravity
+            lift: -8,     // Slightly stronger lift
             velocity: 0,
             color: 'yellow'
         };
@@ -40,8 +40,8 @@
         // Pipe properties
         const pipes = [];
         const pipeWidth = 60;
-        const pipeGap = 250; // Very wide gap
-        const pipeSpeed = 1; // Slow pipe movement
+        const pipeGap = 200; // Increased gap
+        const pipeSpeed = 1.5; // Slower pipe speed
 
         let score = 0;
         let isGameOver = false;
@@ -101,7 +101,7 @@
             });
 
             // Add new pipe
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) { // Wider spacing between pipes
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 300) { // Pipes appear further apart
                 const pipeTopHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
                 pipes.push({ x: canvas.width, top: pipeTopHeight });
             }
