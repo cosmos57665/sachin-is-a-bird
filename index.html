@@ -3,24 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird (Easy Mode)</title>
+    <title>Flappy Bird</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
+            font-family: Arial, sans-serif;
         }
         canvas {
             display: block;
             background: skyblue;
         }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: yellow;
+            border: 2px solid black;
+            border-radius: 10px;
+            cursor: pointer;
+            display: block;
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <button id="startButton">Start Game</button>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        const startButton = document.getElementById('startButton');
 
         // Set canvas dimensions
         canvas.width = window.innerWidth;
@@ -31,8 +47,8 @@
             x: 100,
             y: canvas.height / 2,
             radius: 20,
-            gravity: 0.07, // Reduced gravity
-            lift: -3,     // Slightly stronger lift
+            gravity: 0.07,
+            lift: -3,
             velocity: 0,
             color: 'yellow'
         };
@@ -40,11 +56,12 @@
         // Pipe properties
         const pipes = [];
         const pipeWidth = 60;
-        const pipeGap = 300; // Increased gap
-        const pipeSpeed = 1.7; // Slower pipe speed
+        const pipeGap = 250; // Wide gap
+        const pipeSpeed = 1.5; // Moderate speed
 
         let score = 0;
         let isGameOver = false;
+        let isGameStarted = false;
 
         function drawBird() {
             ctx.beginPath();
@@ -101,7 +118,7 @@
             });
 
             // Add new pipe
-            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 300) { // Pipes appear further apart
+            if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) {
                 const pipeTopHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
                 pipes.push({ x: canvas.width, top: pipeTopHeight });
             }
@@ -131,13 +148,19 @@
             }
         }
 
+        // Start the game
+        startButton.addEventListener('click', () => {
+            isGameStarted = true;
+            startButton.style.display = 'none'; // Hide start button
+            gameLoop();
+        });
+
+        // Control bird on key press
         window.addEventListener('keydown', () => {
-            if (!isGameOver) {
+            if (isGameStarted && !isGameOver) {
                 bird.velocity = bird.lift;
             }
         });
-
-        gameLoop();
     </script>
 </body>
 </html>
