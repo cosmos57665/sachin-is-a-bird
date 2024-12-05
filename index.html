@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird - Restart Fixed</title>
+    <title>Flappy Bird - Highest Score</title>
     <style>
         body {
             margin: 0;
@@ -50,6 +50,7 @@
         birdImage.src = "yellowbird-midflap.png";
 
         let bird, pipes, score, isGameOver, isGameStarted;
+        let highestScore = localStorage.getItem('highestScore') || 0; // Retrieve highest score from localStorage
 
         function initializeGame() {
             // Bird properties
@@ -96,6 +97,7 @@
             ctx.fillStyle = 'black';
             ctx.font = '24px Arial';
             ctx.fillText(`Score: ${score}`, 20, 40);
+            ctx.fillText(`Highest Score: ${highestScore}`, 20, 70);
         }
 
         function updateBird() {
@@ -135,13 +137,23 @@
 
         function endGame() {
             isGameOver = true;
+
+            // Update highest score
+            if (score > highestScore) {
+                highestScore = score;
+                localStorage.setItem('highestScore', highestScore); // Save to localStorage
+            }
+
+            // Display Game Over screen
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
             ctx.font = '48px Arial';
             ctx.textAlign = 'center';
-            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
-            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 50);
+            ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 30);
+            ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
+            ctx.fillText(`Highest Score: ${highestScore}`, canvas.width / 2, canvas.height / 2 + 50);
+
             restartButton.style.display = 'block'; // Show restart button
         }
 
@@ -162,7 +174,6 @@
         startButton.addEventListener('click', () => {
             initializeGame();
             startButton.style.display = 'none'; // Hide start button
-            isGameStarted = true;
             gameLoop();
         });
 
