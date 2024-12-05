@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird - Realistic Edition</title>
+    <title>Flappy Bird with Rain</title>
     <style>
         body {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         canvas {
             display: block;
-            background: linear-gradient(to bottom, #87CEEB, #f0f8ff); /* Sky gradient */
+            background: linear-gradient(to bottom, #87CEEB, #f0f8ff);
         }
         #startButton, #restartButton {
             position: absolute;
@@ -45,24 +45,21 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        // Load images
         const birdFrames = [
-            "lick.png",
+            "lick",
             "https://raw.githubusercontent.com/sourabhv/FlapPyBird/master/assets/sprites/yellowbird-midflap.png",
-            "lick.png"
+            "lick"
         ];
         const groundImage = new Image();
         groundImage.src = "https://raw.githubusercontent.com/sourabhv/FlapPyBird/master/assets/sprites/base.png";
-
         const backgroundImage = new Image();
         backgroundImage.src = "https://raw.githubusercontent.com/sourabhv/FlapPyBird/master/assets/sprites/background-day.png";
 
-        // Sounds
         const flapSound = new Audio("https://example.com/flap.mp3");
         const collisionSound = new Audio("https://example.com/collision.mp3");
         const pointSound = new Audio("https://example.com/point.mp3");
 
-        let bird, pipes, ground, score, isGameOver, isGameStarted, backgroundX, raindrops, birdFrame, frameCount, highestScore;
+        let bird, pipes, ground, score, isGameOver, backgroundX, birdFrame, frameCount, highestScore, raindrops;
 
         function initializeGame() {
             bird = {
@@ -72,24 +69,17 @@
                 height: 24,
                 gravity: 0.07,
                 lift: -3,
-                velocity: 0,
-                airResistance: 0.99
+                velocity: 0
             };
 
             pipes = [];
             score = 0;
             isGameOver = false;
-            isGameStarted = true;
             backgroundX = 0;
             birdFrame = 0;
             frameCount = 0;
-            highestScore = localStorage.getItem('highestScore') || 0;
 
-            raindrops = Array.from({ length: 100 }, () => ({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                speed: 5 + Math.random() * 5
-            }));
+            highestScore = parseInt(localStorage.getItem('highestScore')) || 0;
 
             ground = {
                 x: 0,
@@ -98,6 +88,12 @@
                 height: 112,
                 speed: 2
             };
+
+            raindrops = Array.from({ length: 100 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                speed: 5 + Math.random() * 5
+            }));
         }
 
         initializeGame();
@@ -143,12 +139,11 @@
             ctx.fillStyle = 'black';
             ctx.font = '24px Arial';
             ctx.fillText(`Score: ${score}`, 20, 40);
-            ctx.fillText(`Highest Score: ${highestScore}`, 20, 70);
+            ctx.fillText(`High Score: ${highestScore}`, 20, 70);
         }
 
         function updateBird() {
             bird.velocity += bird.gravity;
-            bird.velocity *= bird.airResistance;
             bird.y += bird.velocity;
 
             if (bird.y + bird.height >= ground.y || bird.y <= 0) endGame();
@@ -157,7 +152,9 @@
         function updatePipes() {
             pipes.forEach(pipe => {
                 pipe.x -= pipeSpeed;
+
                 if (pipe.x + pipe.width < 0) pipes.shift();
+
                 if (
                     bird.x + bird.width > pipe.x &&
                     bird.x < pipe.x + pipe.width &&
@@ -165,11 +162,18 @@
                 ) {
                     endGame();
                 }
+
+                // Increment score if bird passes the pipe
+                if (!pipe.passed && bird.x > pipe.x + pipe.width) {
+                    pipe.passed = true;
+                    score++;
+                    pointSound.play();
+                }
             });
 
             if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) {
                 const topHeight = Math.random() * (canvas.height - pipeGap - 150) + 50;
-                pipes.push({ x: canvas.width, top: topHeight, gap: pipeGap, width: pipeWidth });
+                pipes.push({ x: canvas.width, top: topHeight, gap: pipeGap, width: pipeWidth, passed: false });
             }
         }
 
@@ -204,7 +208,7 @@
             ctx.textAlign = 'center';
             ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2 - 30);
             ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
-            ctx.fillText(`Highest Score: ${highestScore}`, canvas.width / 2, canvas.height / 2 + 50);
+            ctx.fillText(`High Score: ${highestScore}`, canvas.width / 2, canvas.height / 2 + 50);
 
             restartButton.style.display = 'block';
         }
@@ -245,14 +249,14 @@
         });
 
         window.addEventListener('keydown', () => {
-            if (!isGameOver && isGameStarted) {
+            if (!isGameOver) {
                 bird.velocity = bird.lift;
                 flapSound.play();
             }
         });
 
         window.addEventListener('touchstart', () => {
-            if (!isGameOver && isGameStarted) {
+            if (!isGameOver) {
                 bird.velocity = bird.lift;
                 flapSound.play();
             }
