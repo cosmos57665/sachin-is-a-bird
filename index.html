@@ -25,7 +25,6 @@
             border: 2px solid black;
             border-radius: 10px;
             cursor: pointer;
-            display: block;
         }
     </style>
 </head>
@@ -42,15 +41,18 @@
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
+        const birdImage = new Image();
+        birdImage.src = "yellowbird-midflap.jpeg.png";
+
         // Bird properties
         const bird = {
             x: 100,
             y: canvas.height / 2,
-            radius: 20,
+            width: 34, // Image width
+            height: 24, // Image height
             gravity: 0.07,
             lift: -3,
-            velocity: 0,
-            color: 'yellow'
+            velocity: 0
         };
 
         // Pipe properties
@@ -64,11 +66,7 @@
         let isGameStarted = false;
 
         function drawBird() {
-            ctx.beginPath();
-            ctx.arc(bird.x, bird.y, bird.radius, 0, Math.PI * 2);
-            ctx.fillStyle = bird.color;
-            ctx.fill();
-            ctx.closePath();
+            ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
         }
 
         function drawPipes() {
@@ -93,7 +91,7 @@
             bird.velocity += bird.gravity;
             bird.y += bird.velocity;
 
-            if (bird.y + bird.radius >= canvas.height || bird.y - bird.radius <= 0) {
+            if (bird.y + bird.height >= canvas.height || bird.y <= 0) {
                 endGame();
             }
         }
@@ -109,9 +107,9 @@
 
                 // Check collision
                 if (
-                    bird.x + bird.radius > pipe.x &&
-                    bird.x - bird.radius < pipe.x + pipeWidth &&
-                    (bird.y - bird.radius < pipe.top || bird.y + bird.radius > pipe.top + pipeGap)
+                    bird.x + bird.width > pipe.x &&
+                    bird.x < pipe.x + pipeWidth &&
+                    (bird.y < pipe.top || bird.y + bird.height > pipe.top + pipeGap)
                 ) {
                     endGame();
                 }
@@ -157,7 +155,7 @@
 
         // Control bird on key press
         window.addEventListener('keydown', () => {
-            if (isGameStarted && !isGameOver) {
+            if (!isGameOver && isGameStarted) {
                 bird.velocity = bird.lift;
             }
         });
