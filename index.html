@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flappy Bird - Highest Score</title>
+    <title>Flappy Bird - Ultra Realistic Pipes</title>
     <style>
         body {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         canvas {
             display: block;
-            background: skyblue;
+            background: linear-gradient(to bottom, #87CEEB, #f0f8ff); /* Sky gradient */
         }
         #startButton, #restartButton {
             position: absolute;
@@ -47,35 +47,32 @@
         canvas.height = window.innerHeight;
 
         const birdImage = new Image();
-        birdImage.src = "yellowbird-midflap.png";
+        birdImage.src = "https://raw.githubusercontent.com/sourabhv/FlapPyBird/master/assets/sprites/yellowbird-midflap.png";
 
         let bird, pipes, score, isGameOver, isGameStarted;
         let highestScore = localStorage.getItem('highestScore') || 0; // Retrieve highest score from localStorage
 
         function initializeGame() {
-            // Bird properties
             bird = {
                 x: 100,
                 y: canvas.height / 2,
-                width: 34, // Image width
-                height: 24, // Image height
+                width: 34,
+                height: 24,
                 gravity: 0.07,
                 lift: -3,
                 velocity: 0
             };
-
-            // Pipe properties
             pipes = [];
             score = 0;
             isGameOver = false;
-            isGameStarted = true; // Game is active once started
+            isGameStarted = true;
         }
 
         initializeGame();
 
-        const pipeWidth = 60;
-        const pipeGap = 250; // Wide gap
-        const pipeSpeed = 1.5; // Moderate speed
+        const pipeWidth = 70;
+        const pipeGap = 250;
+        const pipeSpeed = 2;
 
         function drawBird() {
             ctx.drawImage(birdImage, bird.x, bird.y, bird.width, bird.height);
@@ -83,13 +80,40 @@
 
         function drawPipes() {
             pipes.forEach(pipe => {
-                // Top pipe
-                ctx.fillStyle = 'green';
-                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
+                // Pipe body
+                const gradient = ctx.createLinearGradient(pipe.x, 0, pipe.x + pipeWidth, 0);
+                gradient.addColorStop(0, '#3c803d'); // Shaded green
+                gradient.addColorStop(0.5, '#43a047'); // Highlighted green
+                gradient.addColorStop(1, '#3c803d'); // Shaded green
+                ctx.fillStyle = gradient;
 
+                // Top pipe
+                ctx.fillRect(pipe.x, 0, pipeWidth, pipe.top);
                 // Bottom pipe
-                ctx.fillStyle = 'green';
                 ctx.fillRect(pipe.x, pipe.top + pipeGap, pipeWidth, canvas.height - pipe.top - pipeGap);
+
+                // Pipe shadows
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                ctx.fillRect(pipe.x + pipeWidth - 5, 0, 5, pipe.top); // Top shadow
+                ctx.fillRect(pipe.x + pipeWidth - 5, pipe.top + pipeGap, 5, canvas.height - pipe.top - pipeGap); // Bottom shadow
+
+                // Pipe caps
+                const capGradient = ctx.createLinearGradient(pipe.x, pipe.top - 20, pipe.x + pipeWidth, pipe.top);
+                capGradient.addColorStop(0, '#2e672f');
+                capGradient.addColorStop(0.5, '#3c803d');
+                capGradient.addColorStop(1, '#2e672f');
+                ctx.fillStyle = capGradient;
+
+                // Top cap
+                ctx.fillRect(pipe.x - 5, pipe.top - 20, pipeWidth + 10, 20);
+                // Bottom cap
+                ctx.fillRect(pipe.x - 5, pipe.top + pipeGap, pipeWidth + 10, 20);
+
+                // Cap border
+                ctx.strokeStyle = '#1d4d1f';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(pipe.x - 5, pipe.top - 20, pipeWidth + 10, 20); // Top cap border
+                ctx.strokeRect(pipe.x - 5, pipe.top + pipeGap, pipeWidth + 10, 20); // Bottom cap border
             });
         }
 
@@ -118,7 +142,6 @@
                     score++;
                 }
 
-                // Check collision
                 if (
                     bird.x + bird.width > pipe.x &&
                     bird.x < pipe.x + pipeWidth &&
@@ -128,7 +151,6 @@
                 }
             });
 
-            // Add new pipe
             if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 400) {
                 const pipeTopHeight = Math.random() * (canvas.height - pipeGap - 50) + 20;
                 pipes.push({ x: canvas.width, top: pipeTopHeight });
@@ -138,13 +160,11 @@
         function endGame() {
             isGameOver = true;
 
-            // Update highest score
             if (score > highestScore) {
                 highestScore = score;
-                localStorage.setItem('highestScore', highestScore); // Save to localStorage
+                localStorage.setItem('highestScore', highestScore);
             }
 
-            // Display Game Over screen
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'white';
@@ -154,7 +174,7 @@
             ctx.fillText(`Score: ${score}`, canvas.width / 2, canvas.height / 2 + 10);
             ctx.fillText(`Highest Score: ${highestScore}`, canvas.width / 2, canvas.height / 2 + 50);
 
-            restartButton.style.display = 'block'; // Show restart button
+            restartButton.style.display = 'block';
         }
 
         function gameLoop() {
@@ -170,28 +190,24 @@
             }
         }
 
-        // Start the game
         startButton.addEventListener('click', () => {
             initializeGame();
-            startButton.style.display = 'none'; // Hide start button
+            startButton.style.display = 'none';
             gameLoop();
         });
 
-        // Restart the game
         restartButton.addEventListener('click', () => {
             initializeGame();
-            restartButton.style.display = 'none'; // Hide restart button
+            restartButton.style.display = 'none';
             gameLoop();
         });
 
-        // Control bird on key press
         window.addEventListener('keydown', () => {
             if (!isGameOver && isGameStarted) {
                 bird.velocity = bird.lift;
             }
         });
 
-        // Add touch controls for mobile
         window.addEventListener('touchstart', () => {
             if (!isGameOver && isGameStarted) {
                 bird.velocity = bird.lift;
