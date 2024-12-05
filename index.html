@@ -159,6 +159,13 @@
                 bird.velocity = bird.lift;
             }
         });
+
+        // Add touch controls for mobile
+        window.addEventListener('touchstart', () => {
+            if (!isGameOver && isGameStarted) {
+                bird.velocity = bird.lift;
+            }
+        });
     </script>
 </body>
 </html>
